@@ -3,13 +3,12 @@
 #include <string>
 #include <ctime>
 #include <cstdlib>
-#include <vector>
 
 class HouseElf {
 public:
 	bool bIsHouse = false;
 	std::string nameElf = "NONE";
-public:
+
 	HouseElf(std::string in_nameElf) {
 		this->bIsHouse = true;
 		assert(in_nameElf != "NONE");
@@ -23,7 +22,7 @@ public:
 	int count = 0;
 	Branch** childs = nullptr;
 	HouseElf* houseElf = nullptr;
-public:
+
 	Branch(int in_rand, int out_rand) {
 		std::srand(std::time(nullptr));
 		int rand = (std::rand() % out_rand);
@@ -63,9 +62,7 @@ public:
 		} else
 			return;
 	}
-	int getChildsNum() {
-		return count;
-	}
+	
 	std::string getNameElf() {
 		return this->houseElf->nameElf;
 	}
@@ -78,9 +75,7 @@ public:
 		return parent->getTopBranch();
 	}
 
-	void sowInfo() {
-		if (houseElf != nullptr)
-			std::cout << houseElf->nameElf << std::endl;
+	void showAllElf() {
 		for (int i = 0; i < count; ++i) {
 			if (childs[i]->houseElf != nullptr) {
 				std::cout << childs[i]->houseElf->nameElf << std::endl;
@@ -93,6 +88,66 @@ public:
 		}
 	}
 
+	bool isOnTree(std::string in_name) {
+		int count = 0;
+		for (int i = 0; i < this->count; ++i) {
+			if (childs[i]->houseElf != nullptr) {
+				if (in_name == childs[i]->houseElf->nameElf) {
+					count++;
+					break;
+				}
+			}
+			for (int j = 0; j < childs[i]->count; ++j) {
+				if (childs[i]->childs[j]->houseElf != nullptr) {
+					if (in_name == childs[i]->childs[j]->houseElf->nameElf) {
+						count++;
+						break;
+					}
+				}
+			}
+		}
+		if (count > 0)
+			return true;
+		else
+			return false;
+	}
+
+	void showNeighborsNamesByName(std::string in_name) {
+		int parent_index;
+		for (int i = 0; i < count; ++i) {
+			if (childs[i]->houseElf != nullptr) {
+				if (in_name == childs[i]->houseElf->nameElf)
+					parent_index = i;
+				break;
+			}
+			for (int j = 0; j < childs[i]->count; ++j) {
+				if (childs[i]->childs[j]->houseElf != nullptr) {
+					if (in_name == childs[i]->childs[j]->houseElf->nameElf) {
+						parent_index = i;
+						break;
+					}
+				}
+			}
+		}
+		std::cout << "Neighbor's List of elf " << in_name << ":" << std::endl;
+		int neighbors = 0;
+		if (childs[parent_index]->houseElf != nullptr) {
+			if (in_name != childs[parent_index]->houseElf->nameElf) {
+				std::cout << childs[parent_index]->houseElf->nameElf << std::endl;
+				neighbors++;
+			}
+		}
+		for (int i = 0; i < childs[parent_index]->count; ++i) {
+			if (childs[parent_index]->childs[i]->houseElf != nullptr) {
+				if (in_name != childs[parent_index]->childs[i]->houseElf->nameElf) {
+					std::cout << childs[parent_index]->childs[i]->houseElf->nameElf << std::endl;
+					neighbors++;
+				}
+			}
+		}
+		std::cout << "Number of neighbors = " << neighbors << std::endl;
+	}
+
 };
 
 int main() {
@@ -100,10 +155,19 @@ int main() {
 
 	auto* branch = new Branch(3, 6);
 
-	branch->sowInfo();
+	branch->showAllElf();
+
+	std::cout << "Input name for search neighbors on branch:";
+	std::string in_name;
+	std::cin >> in_name;
+	while (!(branch->isOnTree(in_name))) {
+		std::cout << "Incorrect name. Try again." << std::endl;
+		std::cout << "Input name for search neighbors on branch:";
+		std::cin >> in_name;
+	}
+	branch->showNeighborsNamesByName(in_name);
 
 	delete branch;
-	branch = nullptr;
 
 	return 0;
 }

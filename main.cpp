@@ -35,7 +35,25 @@ public:
 		if (out_rand > 0) {
 			childs = new Branch *[count];
 			for (int i = 0; i < count; ++i) {
-				childs[i] = new Branch(in_rand, out_rand);
+				auto* child = new Branch(in_rand, out_rand);
+				childs[i] = child;
+				childs[i]->parent = this;
+				std::srand(std::time(nullptr));
+				int rand = (std::rand() % out_rand);
+				while (rand < in_rand)
+					rand = (std::rand() % out_rand);
+				childs[i]->count = rand;
+				childs[i]->childs = new Branch*[childs[i]->count];
+				for (int j = 0; j < childs[i]->count; j++) {
+					auto* child = new Branch(in_rand, out_rand);
+					childs[i]->childs[j] = child;
+					childs[i]->childs[j]->parent = this;
+					std::cout << "Input name of elf:";
+					std::string in_name;
+					std::cin >> in_name;
+					if (in_name != "NONE")
+						childs[i]->childs[j]->houseElf = new HouseElf(in_name);
+				}
 				std::cout << "Input name of elf:";
 				std::string in_name;
 				std::cin >> in_name;
@@ -45,6 +63,14 @@ public:
 		} else
 			return;
 	}
+	int getChildsNum() {
+		return count;
+	}
+	std::string getNameElf() {
+		return this->houseElf->nameElf;
+	}
+
+	
 
 	Branch* getTopBranch() {
 		if (parent == nullptr) return nullptr;
@@ -58,6 +84,11 @@ public:
 		for (int i = 0; i < count; ++i) {
 			if (childs[i]->houseElf != nullptr) {
 				std::cout << childs[i]->houseElf->nameElf << std::endl;
+			}
+			for (int j = 0; j < childs[i]->count; ++j) {
+				if (childs[i]->childs[j]->houseElf != nullptr) {
+					std::cout << childs[i]->childs[j]->houseElf->nameElf << std::endl;
+				}
 			}
 		}
 	}
